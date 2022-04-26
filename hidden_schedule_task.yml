@@ -1,0 +1,68 @@
+title: Hiding Scheduled Tasks
+id: bb0c451a-d79b-4084-b156-159bf4ba4e79
+description: Detects maintaining persistence with a hidden scheduled task by removing the SD (Security Descriptor) value form the registry which gets stored with every new scheduled task creation and determines the allowed users to run the task. Removing the SD value requires a SYSTEM level privileges.
+status: Stable
+author: Cyber Castle
+date: 2022/04/14
+modified: 2022/04/24
+tags:
+  - attack.T1112
+  - attack.T1036.004
+  - attack.DefenseEvasion
+  - attack.T1053
+  - attack.Persistence
+references: https://www.microsoft.com/security/blog/2022/04/12/tarrask-malware-uses-scheduled-tasks-for-defense-evasion/
+#security logs
+logsource:
+    product: windows
+    service: security
+detection:
+  Registry_Modification:
+    EventID: 4657
+    OperationType: %%1906 #Registry value deleted
+    ObjectName|beginwith: '\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\'
+    ObjectValueName:
+      - SD
+  Process_Creation:
+    EventID:
+      - 4688
+    CommandLine|contains|all:
+            - 'reg delete' 
+            - 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\*\SD'
+  condition: Process_Creation or Registry_Modification
+#It's necessary to modify the auditing policy to identify Scheduled Tasks actions by:
+#- Enable object level auditing for the following registry paths
+#- HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\
+---
+title: Hiding Scheduled Tasks
+id: bb0c451a-d79b-4084-b156-159bf4ba4e77
+description: Detects maintaining persistence with a hidden scheduled task by removing the SD (Security Descriptor) value form the registry which gets stored with every new scheduled task creation and determines the allowed users to run the task. Removing the SD value requires a SYSTEM level privileges.
+status: Stable
+tags:
+  - attack.T1112
+  - attack.T1036.004
+  - attack.DefenseEvasion
+  - attack.T1053
+  - attack.Persistence
+author: Cyber Castle
+date: 2022/04/14
+modified: 2022/04/24
+#sysmon logs
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    Process_Creation:
+        EventID: 1
+        CommandLine|contains|all:
+            - 'reg delete' 
+            - 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\*\SD'
+    Registry_Modification:
+        EventID: 12
+        TargetObject: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\*\SD'
+    condition: Registry_Modification or Process_Creation
+falsepositives:
+    - None
+level: high
+
+#If you're deploying an EDR in your netowrk, you can also utilize its events for the detection
