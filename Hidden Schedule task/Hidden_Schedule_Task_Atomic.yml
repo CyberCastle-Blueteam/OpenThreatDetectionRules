@@ -22,6 +22,6 @@
       Copy-Item $env:TEMP\PsTools\PsExec.exe "#{psexec_exe}" -Force
   executor:
     command: |
-	  schtasks /create /sc minute /mo 1 /tn hidden /tr calc.exe
+    	schtasks /create /sc minute /mo 1 /tn hidden /tr calc.exe
       #{psexec_exe} -i -s -d reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\hidden" /v SD /f
     name: command_prompt
