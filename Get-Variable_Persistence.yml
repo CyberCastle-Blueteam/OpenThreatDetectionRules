@@ -1,0 +1,58 @@
+title: Persistence and Masquerading by Get-Variable cmdlet
+id: 40aff79a-c60a-11ec-9d64-0242ac120002
+description: Detect the Persistence technique used by loading of executables/Scripts named Get-Variable.* when opening powershell or run Get-Variable commands.
+status: Stable
+references:
+    - https://fourcore.io/blogs/colibri-loader-powershell-get-variable-persistence
+author: Cyber Castle [Karem Ali, Ahmed Essam]
+date: 2021/04/27
+tags:
+  - attack.persistence
+  - attack.t1546
+  - attack.defense_evasion
+  - attack.t1027
+#security logs
+logsource:
+    product: windows
+    service: security
+    difination: Event ID 4688 (process creation) must be enabled which is not the default.
+detection:
+    ProcessCreation:
+        EventID: 4688
+        ProcessName|contains: 'Get-Variable.' #According to our tests, Get-variable can load powershell scripts (ps1) and exe and any exe equivalent ex: .com, .cmd etc.
+    condition: ProcessCreation 
+falsepositives:
+    - Checked various operating systems and didn't find Get-Variable.* but it could be found in another version.
+level: high
+---
+title: Persistence and Masquerading by Get-Variable cmdlet
+id: e9b5e692-c60a-11ec-9d64-0242ac120002
+description: Detect the Persistence technique used by loading of executables/Scripts named Get-Variable.* when opening powershell or run Get-Variable commands.
+status: Stable
+references:
+    - https://fourcore.io/blogs/colibri-loader-powershell-get-variable-persistence
+author: Cyber Castle [Karem Ali, Ahmed Essam]
+date: 2021/04/27
+tags:
+  - attack.persistence
+  - attack.t1546
+  - attack.defense_evasion
+  - attack.t1027
+#sysmon logs
+logsource:
+    product: windows
+    service: sysmon
+    defination: 
+        - SysmonModular rules containes default rules will generate the required logs for this rule
+        - those event could be mapped to any EDR equivelent events.  
+detection:
+    ProcessCreation:
+        EventID: 1
+        ProcessName|contains: 'Get-Variable.'
+    FileCreation:
+        EventID: 11
+        TargetFilename|contains: 'Get-Variable.' #According to our tests, Get-variable can load powershell scripts (ps1) and exe and any exe equivalent ex: .com, .cmd etc.
+    condition: ProcessCreation or FileCreation
+falsepositives:
+    - Checked various operating systems and didn't find Get-Variable.* but it could be found in another version.
+level: high
