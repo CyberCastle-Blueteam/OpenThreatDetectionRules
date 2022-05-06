@@ -8,8 +8,8 @@ atomic_tests:
   supported_platforms:
   - windows
   input_arguments:
-    PathToEXE:
-      description: The copied executable
+    ExeToRun:
+      description: The executable that will run with powershell
       type: Path
       default: c:\windows\system32\calc.exe
     DestinationPath:
@@ -18,8 +18,8 @@ atomic_tests:
       default: C:\Users\$env:username\AppData\Local\Microsoft\WindowsApps\Get-Variable.exe
   executor:
     command: |
-      Copy-item -Path #{PathToEXE} -Destination #{DestinationPath}
-   
+      Copy-item -Path #{ExeToRun} -Destination #{DestinationPath}
+      powershell.exe
     cleanup_command: |
       remove-item  #{DestinationPath}
     name: powershell
