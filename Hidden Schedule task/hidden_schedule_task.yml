@@ -1,0 +1,65 @@
+title: Hiding Scheduled Tasks
+id: bb0c451a-d79b-4084-b156-159bf4ba4e79
+description: Detects maintaining persistence with a hidden scheduled task by removing the SD (Security Descriptor) value form the registry which gets stored with every new scheduled task creation and determines the allowed users to run the task. Removing the SD value requires a SYSTEM level privileges.
+status: Stable
+author: Cyber Castle [Ahmed Essam]
+date: 2022/04/14
+modified: 2022/04/24
+tags:
+  - attack.T1112
+  - attack.DefenseEvasion
+references: https://www.microsoft.com/security/blog/2022/04/12/tarrask-malware-uses-scheduled-tasks-for-defense-evasion/
+#security logs
+logsource:
+    product: windows
+    service: security
+    definition: 
+    - Registry Auditing must be enabled, and the SACL for HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Tree must be set to audit delete operation.
+    - Don't set the SACL for all actions as this will generate huge number of unnecessary events.
+detection:
+  RegistryValueDeletion:
+    EventID: 4657
+    OperationType: '%%1906' #Registry value deleted
+    ObjectName|startswith: '\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\'
+    ObjectValueName:
+      - SD
+  ProcessCreation:
+    EventID:
+      - 4688
+    CommandLine|contains|all:
+            - 'reg delete' 
+            - 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\*\SD'
+  condition: RegistryValueDeletion or ProcessCreation
+falsepositives: None
+level: high
+---
+title: Hiding Scheduled Tasks
+id: bb0c451a-d79b-4084-b156-159bf4ba4e77
+description: Detects maintaining persistence with a hidden scheduled task by removing the SD (Security Descriptor) value form the registry which gets stored with every new scheduled task creation and determines the allowed users to run the task. Removing the SD value requires a SYSTEM level privileges.
+status: Stable
+tags:
+  - attack.T1112
+  - attack.DefenseEvasion
+author: Cyber Castle [Ahmed Essam]
+date: 2022/04/14
+modified: 2022/04/24
+#sysmon logs
+logsource:
+    product: windows
+    service: sysmon
+    definition:
+        - SysmonModular rules containes default rules will generate the required logs for this rule
+        - those event could be mapped to any EDR equivelent events.  
+detection:
+    ProcessCreation:
+        EventID: 1
+        CommandLine|contains|all:
+            - 'reg delete' 
+            - 'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\*\SD'
+    RegistryValueDeletion:
+        EventID: 12
+        TargetObject: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\*\SD'
+    condition: RegistryValueDeletion or ProcessCreation
+falsepositives:
+    - None
+level: high
