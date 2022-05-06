@@ -5,6 +5,8 @@
 
 
 
+
+
 Each threat detection rule will contains the following:
 
 - SIGMA rule describing the detection.
@@ -13,7 +15,7 @@ Each threat detection rule will contains the following:
 
 
 
-#### Threat detection Quality Insurance
+### Threat detection Quality Insurance
 
 Quality insurance is the main factor while creating the detection use cases, Cyber Castle's engineers follow a comprehensive and concrete life cycle to produce the detection use cases with low false-positive and false-negative rates.
 
