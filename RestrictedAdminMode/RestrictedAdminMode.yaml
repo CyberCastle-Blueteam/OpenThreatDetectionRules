@@ -1,0 +1,29 @@
+attack_technique: Restricted Admin Mode
+display_name: Restricted Admin Mode
+atomic_tests:
+- name: Disabling Restricted Admin Mode
+  auto_generated_guid: c1821d90-6656-4a14-8c3a-b9ee0bab6edd
+  description: |
+    Disabling RDP restricted admin could be done by threat actor to ensure that RDP logins will result in storing the credentials in the memory. 
+  supported_platforms:
+    - windows
+  executor:
+    command: |
+      reg add "HKLM\system\currentcontrolset\control\lsa" /f /v DisableRestrictedAdmin /t REG_DWORD /d 1
+    cleanup_command: |
+      reg delete "HKLM\system\currentcontrolset\control\lsa" /f /v DisableRestrictedAdmin
+    name: command_prompt
+    elevation_required: true
+- name: Enabling Restricted Admin Mode
+  auto_generated_guid: 6ff94967-34e4-4ad0-be7a-f734c13f014a
+  description: |
+    Enabling RDP restricted admin could be done by threat actor to be able to perform pass the hash attack over RDP.  
+  supported_platforms:
+    - windows
+  executor:
+    command: |
+      reg add "HKLM\system\currentcontrolset\control\lsa" /f /v DisableRestrictedAdmin /t REG_DWORD /d 0
+    cleanup_command: |
+      reg delete "HKLM\system\currentcontrolset\control\lsa" /f /v DisableRestrictedAdmin
+    name: command_prompt
+    elevation_required: true

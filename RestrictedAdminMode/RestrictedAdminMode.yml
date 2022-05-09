@@ -1,0 +1,131 @@
+title: Detect disabling RDP restricted admin
+id: 2cbac61c-0996-4b9c-a97e-66a42b0e3727
+date: 2022/04/24
+author: Cyber Castle [Karem Ali]
+description: Detect disabling RDP restricted admin by registery modification could be done by threat actor to ensure that RDP logins will result in storing the credentials in the memory. 
+tags: 
+   - attack.T1562.001
+   - attack.DefenseEvasion
+references:  
+    - https://social.technet.microsoft.com/wiki/contents/articles/32905.remote-desktop-services-enable-restricted-admin-mode.aspx
+logsource:
+  product: windows
+  service: security
+  definition: 
+      - Registry Auditing must be enabled, and the SACL for HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Lsa must be set to audit delete/Set value operation.
+      - Don't set the SACL for all actions as this will generate huge number of unnecessary events.
+detection:
+  RegistryPath:
+    EventID: 4657
+    TargetObject: '\REGISTRY\MACHINE\SYSTEM\ControlSet001\Control\Lsa'
+    ObjectValueName: DisableRestrictedAdmin
+
+  DeleteRegisteryValue:
+    OperationType: %%1906 #Registry value deleted
+
+  EditRegisteryValue:
+    OperationType: %%1905 #Existing registry value modified
+    NewValue: 1
+
+  condition: RegistryPath and (DeleteRegisteryValue or EditRegisteryValue)
+
+falsepositives: Legitmate disabling for Restricted admin
+level: medium
+---
+title: Detect disabling RDP restricted admin
+id: ab50b56e-75c9-4a8e-8a92-56df8bc460ef
+date: 2022/04/24
+author: Cyber Castle [Karem Ali]
+description: Detect disabling RDP restricted admin by registery modification could be done by threat actor to ensure that RDP logins will result in storing the credentials in the memory. 
+tags: 
+   - attack.T1562.001
+   - attack.DefenseEvasion
+references:  
+    - https://social.technet.microsoft.com/wiki/contents/articles/32905.remote-desktop-services-enable-restricted-admin-mode.aspx
+logsource:
+  product: windows
+  service: security
+  definition:
+      - SysmonModular rules containes default rules will generate the required logs for this rule
+      - those event could be mapped to any EDR equivelent events.
+detection:
+  DeleteRegisteryValue:
+    EventID: 12
+    TargetObject: 'HKLM\SYSTEM\ControlSet001\Control\Lsa'
+
+  EditRegisteryValue:
+    EventID: 13
+    TargetObject: 'HKLM\SYSTEM\ControlSet001\Control\Lsa'
+    Details: DWORD (0x00000001)
+    
+  condition: DeleteRegisteryValue or EditRegisteryValue
+
+falsepositives: Legitmate disabling for Restricted admin
+level: medium
+---
+title: Detect Enabling RDP restricted admin
+id: 94d4c7fd-833d-4d6d-8487-7394a095ff90
+date: 2022/05/10
+author: Cyber Castle [Karem Ali]
+description: detect Enabling RDP restricted admin by registry modification. it could be done by threat actor to be able to perform pass the hash attack over RDP.
+tags: 
+   - attack.T1562.001
+   - attack.DefenseEvasion
+references:  
+    - https://labs.f-secure.com/blog/undisable/
+    - https://thedfirreport.com/2022/05/09/seo-poisoning-a-gootloader-story/ #check thier rule that based on process creation events
+logsource:
+  product: windows
+  service: security
+  definition: 
+      - Registry Auditing must be enabled, and the SACL for HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Lsa must be set to audit Set value operation.
+      - Don't set the SACL for all actions as this will generate huge number of unnecessary events.
+detection:
+  RegistryPath:
+    EventID: 4657
+    TargetObject: '\REGISTRY\MACHINE\SYSTEM\ControlSet001\Control\Lsa'
+    ObjectValueName: DisableRestrictedAdmin
+
+  DeleteRegisteryValue:
+    OperationType: %%1906 #Registry value deleted
+
+  EditRegisteryValue:
+    OperationType: %%1905 #Existing registry value modified
+    NewValue: 0
+
+  condition: RegistryPath and (DeleteRegisteryValue or EditRegisteryValue)
+
+falsepositives: Legitmate enabling for Restricted admin
+level: medium
+---
+title: Detect Enabling RDP restricted admin
+id: 6f69d6d0-b1a1-4a8b-9f0d-30bec30f89cc
+date: 2022/05/10
+author: Cyber Castle [Karem Ali]
+description: detect Enabling RDP restricted admin by registry modification. it could be done by threat actor to be able to perform pass the hash attack over RDP.  
+tags: 
+   - attack.T1562.001
+   - attack.DefenseEvasion
+references:  
+    - https://labs.f-secure.com/blog/undisable/
+    - https://thedfirreport.com/2022/05/09/seo-poisoning-a-gootloader-story/ #check thier rule that based on process creation events
+logsource: 
+  product: windows
+  service: security
+  definition:
+      - SysmonModular rules containes default rules will generate the required logs for this rule
+      - those event could be mapped to any EDR equivelent events.
+detection:
+  DeleteRegisteryValue:
+    EventID: 12
+    TargetObject: 'HKLM\SYSTEM\ControlSet001\Control\Lsa'
+
+  EditRegisteryValue:
+    EventID: 13
+    TargetObject: 'HKLM\SYSTEM\ControlSet001\Control\Lsa'
+    Details: DWORD (0x00000000)
+    
+  condition: DeleteRegisteryValue or EditRegisteryValue
+
+falsepositives: Legitmate enabling for Restricted admin
+level: medium
