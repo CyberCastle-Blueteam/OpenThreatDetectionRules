@@ -1,0 +1,46 @@
+title: Hijack Avast Driver
+id: ce9edfe4-1666-41db-a3d8-991dee428bec
+description: Detects Hijacking avast anti-rootkit driver to terminate processes including EDR/EPP processes by service installation
+status: Stable
+author: Cyber Castle [Karem Ali]
+date: 2022/05/12
+tags:
+  - attack.T1562
+  - attack.DefenseEvasion
+references: https://www.aon.com/cyber-solutions/aon_cyber_labs/yours-truly-signed-av-driver-weaponizing-an-antivirus-driver/
+logsource:
+    product: windows
+    service: system
+detection:
+  ServiceInstallation:
+    EventID: 7045
+    ServiceName|contains: aswSP
+  condition: ServiceInstallation  # very high false-negative
+
+falsepositives: Legitmate install for avast
+level: high
+---
+title: Hijack Avast Driver
+id: a5649b05-fdbf-4b46-854f-4931120636f4
+description: Detects Hijacking avast anti-rootkit driver to terminate processes including EDR/EPP processes by driver loading event
+status: Stable
+author: Cyber Castle [Karem Ali]
+date: 2022/05/12
+tags:
+  - attack.T1562
+  - attack.DefenseEvasion
+logsource:
+    product: windows
+    service: sysmon
+    definition:
+        - SysmonModular rules containes default rules will generate the required logs for this rule
+        - those event could be mapped to any EDR equivelent events.  
+detection:
+    DriverLoad:
+        EventID: 6
+        Signature: "Avast Software s.r.o."  #check EID 7000 in the system log channel, as the windows patch prevents loading the driver, although the sysmon will show a sucessful loading.
+    condition: DriverLoad
+
+falsepositives:
+    - Legitmate install for avast
+level: high

