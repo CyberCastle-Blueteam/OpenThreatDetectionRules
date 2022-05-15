@@ -20,6 +20,11 @@ atomic_tests:
       description: Path to BItsUpload script
       type: string
       default: $env:TEMP/BITS_Upload.ps1
+
+    BITS_Script:
+      description: Path to BItsUpload script
+      type: string
+      default: https://github.com/CyberCastle-Blueteam/OpenThreatDetectionRules/blob/main/BITS_Upload%20%5BData-Exfilitration%5D/src/Bits_Upload.ps1
         
   dependency_executor_name: powershell
   dependencies:
@@ -28,7 +33,7 @@ atomic_tests:
     prereq_command: |
       if (Test-Path "#{BitsSrvExten_Script}") { exit 0} else { exit 1}
     get_prereq_command: |
-       Invoke-WebRequest 'URL_OF_BITSUPloads_Script' -OutFile "#{BitsSrvExten_Script}"
+       Invoke-WebRequest '#{BITS_Script}' -OutFile "#{BitsSrvExten_Script}"
  
   executor:
     command: |
@@ -91,8 +96,7 @@ atomic_tests:
     
     get_prereq_command: |   
       write-host "The Connectivity to the remote Bits Server is lost, please ensure that Bits server is up!"
-    #get_prereq_command: |
-      #Write-Host "No connectivity to the remote url"
+
 
   - description: |
       Check if Part1.zip is present on the remote server or not.
@@ -132,7 +136,7 @@ atomic_tests:
     FileToExfilitrate:
       description: A sample file to be uploaded to the remove server.
       type: string
-      default: $env:TEMP/Part2.zip     
+      default: $env:TEMP/Part2.zip 
       
   dependency_executor_name: powershell
   dependencies:
