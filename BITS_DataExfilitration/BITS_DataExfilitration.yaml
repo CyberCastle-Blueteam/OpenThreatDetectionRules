@@ -32,7 +32,15 @@ atomic_tests:
       if (Test-Path "#{BitsSrvExten_Script}") { exit 0} else { exit 1}
     get_prereq_command: |
        Invoke-WebRequest 'BitsScript_URL' -OutFile "#{BitsSrvExten_Script}"
- 
+       
+  - description: |
+      Check the machine if it's Windows Server or not !
+      
+    prereq_command: |
+      if (Get-WMIObject win32_operatingsystem |where {$_.Name -like "*Server*"}){exit 0} else {exit 1}
+    
+    get_prereq_command: |   
+      write-host "BITS Server Exention Only Supports Windows Server !"
   executor:
     command: |
       &$env:TEMP\BITS_Upload.ps1 -SelectMode Install; 
