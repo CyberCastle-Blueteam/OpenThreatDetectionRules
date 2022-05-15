@@ -1,4 +1,11 @@
-﻿
+
+#  Version:        1.0
+#  Author:         <CyberCastle [Assem Morad]>
+#  Creation Date:  <12/5/2022>
+#  Purpose/Change: BITS Uplaods Env
+#  Usage:          Refer to -h param
+
+
 param(
     [Parameter()]
     [String]$SelectMode,
