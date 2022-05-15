@@ -22,7 +22,7 @@ atomic_tests:
       default: $env:TEMP/BITS_Upload.ps1
     BitsScript_URL:
       description: URL of BITS Server Script
-      type: string
+      type: Url
       default: https://github.com/CyberCastle-Blueteam/OpenThreatDetectionRules/blob/main/BITS_DataExfilitration/src/Bits_Upload.ps1      
   dependency_executor_name: powershell
   dependencies:
