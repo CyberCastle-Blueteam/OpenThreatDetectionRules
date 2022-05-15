@@ -4,7 +4,7 @@ atomic_tests:
 - name: Avast's binary dumps processes
   auto_generated_guid: 69a9a58b-e49b-4ced-9a75-3fbf51798e20
   description: |
-    Attacker Hijacks avast anti-rootkit driver to terminate processes including EDR/EPP processes 
+    Attacker uses Avast's signed binary (avdump.exe) to dump a process
   supported_platforms:
     - windows
   input_arguments:
