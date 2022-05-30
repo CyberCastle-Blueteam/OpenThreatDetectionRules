@@ -1,0 +1,111 @@
+title: Office Zero Day Vuln [Follina]
+status: experimental
+description: Detects a newly discovered 1-click Exploit MalDoc execution using msdt.exe, which could be used to load a remote malicious HTML payload. [PowerShell Operational]
+reference:
+    - POC (https://www.linkedin.com/posts/johnhammond010_ms-msdt-follina-office-click-to-hack-activity-6936891477365047296-hRYR?utm_source=linkedin_share&utm_medium=member_desktop_web)
+    - ٍSample(https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/#)
+tags:
+    - attack.Initial_access
+    - attack.Execution
+    - attack.T1190
+    
+date: 2022/05/30
+author: CyberCastle [Assem Morad - Pierre Magdy]
+id: a6e4676a-3df0-4b2c-9b06-668bcbcae493
+logsource:    
+    product: windows
+    service: powershellOperational
+detection:
+    PS_Operational:
+        EventID: 4104       
+        ScriptBlock|contains|all:
+            - 'RS_ProgramCompatibilityWizard.ps1'
+            - 'AppName'
+            - 'TargetPath'
+            - '/../'
+                                  
+    condition: PS_Operational
+falsepositives: unknown
+level: high
+---
+title: Office_MalDoc_msdt
+status: experimental
+description: Detects a newly discovered 1-click Attack MalDoc execution using msdt.exe, which could be used to load a remote malicious HTML payload. [Sysmon events]
+reference:
+    - POC (https://www.linkedin.com/posts/johnhammond010_ms-msdt-follina-office-click-to-hack-activity-6936891477365047296-hRYR?utm_source=linkedin_share&utm_medium=member_desktop_web)
+    - ٍSample(https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/#))
+tags:
+    - attack.Initial_access
+    - attack.Execution
+    - attack.T1190
+    
+date: 2022/05/30
+author: CyberCastle [Assem Morad - Pierre Magdy]
+id: a6e4676a-3df0-4b2c-9b06-668bcbcae494
+logsource:    
+    product: windows
+    service: sysmon
+    definition:
+        - SysmonModular rules containes default rules that will generate the required logs for this rule
+        - those events could be mapped to any EDR equivelent events.  
+detection:
+    ProcessCreation:
+        EventID: 1 
+        FileOriginalName: 
+            - 'msdt.exe'
+        CommandLine|contains|all: 
+            - '/../'        
+            - 'ms-msdt'
+            - 'PCWDiagnostic'
+            - 'IT_BrowseForFile'
+    ProcessAccessA:
+        EventID: 10
+        SourceImage: 
+            - 'C:\Windows\System32\sdiagnhost.exe'
+    ProcessAccessB:
+        TargetImage:
+            - 'csc.exe'
+            - 'ROUTE.EXE'
+            - 'makecab.exe'
+            - 'netsh.exe'
+            - 'ipconfig.exe'
+            - 'MsMpEng.exe'
+      
+    condition: ProcessCreation or (ProcessAccessA and not ProcessAccessB)
+falsepositives: unknown
+level: high
+---
+title: Office_MalDoc_msdt
+status: experimental
+description: Detects a newly discovered 1-click Exploit MalDoc execution using msdt.exe, which could be used to load a remote malicious HTML payload. [Security events]
+reference:
+    - POC (https://www.linkedin.com/posts/johnhammond010_ms-msdt-follina-office-click-to-hack-activity-6936891477365047296-hRYR?utm_source=linkedin_share&utm_medium=member_desktop_web)
+    - ٍSample(https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/#)
+tags:
+    - attack.initial_access
+    - attack.Execution
+    - attack.T1190
+    
+date: 2022/05/30
+author: CyberCastle [Assem Morad - Pierre Magdy]
+id: a6e4676a-3df0-4b2c-9b06-668bcbcae495
+logsource:
+    product: windows
+    service: security
+detection:
+    ProcessCreation:
+        EventID: 4688 
+        ProcessName: 
+            - 'msdt.exe'
+        CommandLine|contains|all: 
+            - '/../'
+            - 'ms-msdt'
+            - 'PCWDiagnostic'
+            - 'IT_BrowseForFile'            
+    condition: ProcessCreation
+            
+falsepositives: unknown
+level: high
+
+
+ 
