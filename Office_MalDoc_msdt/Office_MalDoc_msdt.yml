@@ -2,7 +2,8 @@ title: Office_MalDoc_msdt
 status: experimental
 description: Detects a newly discovered 1-click RCE MalDoc execution using msdt.exe, which could be used to load a remote malicious HTML payload. [PowerShell Operational]
 reference:
-    - POC(https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/#)
+    - POC(https://www.linkedin.com/posts/johnhammond010_ms-msdt-follina-office-click-to-hack-activity-6936891477365047296-hRYR?utm_source=linkedin_share&utm_medium=member_desktop_web)
+    - Sample(https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/#)
 tags:
     - attack.Initial_access
     - attack.Execution
@@ -32,7 +33,8 @@ title: Office_MalDoc_msdt
 status: experimental
 description: Detects a newly discovered 1-click RCE MalDoc execution using msdt.exe, which could be used to load a remote malicious HTML payload. [Sysmon events]
 reference:
-    - POC(https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/#)
+    - POC(https://www.linkedin.com/posts/johnhammond010_ms-msdt-follina-office-click-to-hack-activity-6936891477365047296-hRYR?utm_source=linkedin_share&utm_medium=member_desktop_web)
+    - Sample(https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/#))
 tags:
     - attack.Initial_access
     - attack.Execution
@@ -78,7 +80,8 @@ title: Office_MalDoc_msdt
 status: experimental
 description: Detects a newly discovered 1-click RCE MalDoc execution using msdt.exe, which could be used to load a remote malicious HTML payload. [Security events]
 reference:
-    - POC(https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/#)
+    - POC(https://www.linkedin.com/posts/johnhammond010_ms-msdt-follina-office-click-to-hack-activity-6936891477365047296-hRYR?utm_source=linkedin_share&utm_medium=member_desktop_web)
+    - Sample(https://app.any.run/tasks/713f05d2-fe78-4b9d-a744-f7c133e3fafb/#)
 tags:
     - attack.initial_access
     - attack.Execution
